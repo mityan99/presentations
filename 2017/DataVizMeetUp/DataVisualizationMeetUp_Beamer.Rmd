@@ -1,7 +1,7 @@
 ---
 title: | 
-  Introduction to Visualization with R |
-  DataViz Meetup
+  | Introduction to Visualization with R
+  | DataViz Meetup
 author: "Rob Carnell"
 date: "25 Apr 2017"
 output:
@@ -13,7 +13,9 @@ output:
 ---
 
 ```{r, echo=FALSE, results=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+# write out the mtcars dataset so that I can read it back in later
 write.csv(mtcars, file="mtcars.csv")
+# check to ensure all necessary packages are installed
 if (!require(knitr)) install.packages("knitr")
 if (!require(ggplot2)) install.packages("ggplot2")
 if (!require(maps)) install.packages("maps")
@@ -40,7 +42,7 @@ What I won't do:
 
 ## What is R?
 
-'R is a language and environment for statistical computing and graphics.' - \url{www.r-project.org}
+``R is a language and environment for statistical computing and graphics.'' \url{www.r-project.org}
 
 \begin{itemize}
 \item R Installation:  \url{https://cloud.r-project.org/}
@@ -59,6 +61,7 @@ R is Open Source, covered by the GPL, but there are other implementations/copies
 
 \begin{itemize}
 \item Extensible with packages
+\item \texttt{ROxygen} and \texttt{RUnit} for fuction decoration and unit testing
 \item Self Documenting + \href{https://en.wikipedia.org/wiki/Literate_programming}{Literate Programming}
 \begin{itemize}
 \item This whole presentation was created in \texttt{R/RStudio} with the \texttt{knitr} package
@@ -66,7 +69,10 @@ R is Open Source, covered by the GPL, but there are other implementations/copies
 \item Coding in C/C++ using the \texttt{Rcpp} suite of headers
 \item Connections to \texttt{Java}, \texttt{python}, \texttt{C\#}, \texttt{HTML}, \TeX
 \item Connections to data in SQL Server, Oracle, Hadoop, MySQL, sqlite, JDBC, ODBC, PostgresSQL, various NoSQL...
-\item R is 1-based in the intepreter, 0-based in the underlying C code.  It's how statisticians think.  C/C++ use 0 because of pointer operations.
+\item R arrays are 1-based in the intepreter, 0-based in the underlying \texttt{C} code. 
+\begin{itemize}
+\item It's how statisticians think.  \texttt{C} uses 0-based because of pointer operations.
+\end{itemize}
 \end{itemize}
 
 ## How to get help
@@ -88,43 +94,42 @@ R is Open Source, covered by the GPL, but there are other implementations/copies
 \item A little more forgiving of malformed questions
 \end{itemize}
 
-In R:
+In \texttt{R}:
 \begin{itemize}
 \item \texttt{?command} e.g. \texttt{?plot}, \texttt{?mean}, \texttt{?lm}
-\item \texttt{args(command)} also tab-complete in RStudio
-\item \texttt{help.search("command")} also help in RStudio
+\item \texttt{args(command)} also tab-complete in \texttt{RStudio}
+\item \texttt{help.search("command")} also help tab in \texttt{RStudio}
 \end{itemize}
 
 ## Read a CSV
 
 ```{r}
-cars_data <- read.csv(file.path("mtcars.csv"), stringsAsFactors=FALSE) # also an internal dataset, mtcars
+cars_data <- read.csv(file.path("mtcars.csv"), stringsAsFactors=FALSE) 
+# also an internal dataset - use ?mtcars
 # column names
 names(cars_data)
-# rename the CSV row names
-names(cars_data) <- c("model", names(cars_data)[-1])
-names(cars_data)
-```
-
-Learn about the data: `?mtcars`
-
-## Read a CSV (cont.)
-
-```{r}
+# rename the CSV row names into a column
+# negative index means drop that element
+names(cars_data) <- c("model", names(cars_data)[-1]) 
 head(cars_data)
 ```
 
 ## Change Data Types
 
 ```{r}
+# data structure
 str(cars_data)
+# V versus Straight - should be a factor
 cars_data$vs <- factor(cars_data$vs, labels=c("V","S"))
+
 # can also use cars_data[["vs"]] or cars_data[,9] 
 #   or cars_data[,"vs"] or cars_data[,which(names(cars_data) == "vs")]
 # advantage of cars_data$vs is tab-complete
 # advantage of cars_data[["vs"]] is that you can code the column name
 #   name_of_column <- "vs"
 #   cars_data[[name_of_column]]
+
+# with and within allow the data.frame name to not be repeated
 cars_data <- within(cars_data, am <- factor(am, labels=c("Automatic","Manual")))
 class(cars_data$vs)
 ```
@@ -132,8 +137,11 @@ class(cars_data$vs)
 ## Base Graphics
 
 - Internal to R-core, no packages necessary
-- Not very object oriented.  Based on S3 object framework.  
+
+- Not very object oriented.  Based on S3 object framework.
+
 - Create layers on the graphics device
+
 - e.g. `plot.default`, `plot.lm`, `plot.ecdf`
 
 ## Scatterplot
@@ -156,6 +164,7 @@ with(cars_data, plot(x=wt, y=mpg, pch=19, col=gear, xlab="Weight (1000lb)",
 Prof Brewer at Penn State University \url{http://colorbrewer2.org}
 
 - Great colors for maps and plots!
+
 - Sequential (numeric), diverging (numeric with a transition), and qualitative (factors, categorical)
 
 `require(RColorBrewer)` - Method for adding packages
@@ -166,12 +175,12 @@ require(RColorBrewer)
 
 ## Scatterplot - Add legend, use better colors, change axis
 
-```{r fig.width=5, fig.height=3.75, message=FALSE}
+```{r fig.width=5, fig.height=4, message=FALSE}
 my_pal <- brewer.pal(5, "Blues") # gear can take values 3, 4, 5
+par(mar=c(8,4,1,1))
 with(cars_data, plot(x=wt, y=mpg, pch=19, col=my_pal[gear], xlab="Weight (lb)", 
                      ylab="Miles Per Gallon", axes=FALSE))
-axis(2)
-axis(1, at=0:7, labels=(0:7)*1000)
+axis(2); axis(1, at=0:7, labels=(0:7)*1000)
 legend("topright", legend=c("3","4","5"), col=my_pal[3:5], pch=19, 
        pt.cex=1.5, title="Number of Gears", box.col=NA)
 box()
@@ -179,14 +188,19 @@ box()
 
 ## Simple Regression
 
-$Y_{mpg} = \beta_{0} + \beta_{1} X_{wt} + \beta_{2} X^{2}_{wt} + \epsilon$
+$Y_{mpg} = \beta_{0} + \beta_{1} X_{wt} + \beta_{2} X^{2}_{wt} + \epsilon$, $\epsilon \sim N(0,\sigma^2)$
+\medskip
 
-$\epsilon \sim N(0,\sigma^2)$
+\begin{itemize}
+\item Create the R model like this:
+\end{itemize}
 
 ```{r}
-cars_data$wt_squared <- cars_data$wt^2
-cars_lm <- lm(mpg ~ wt + wt_squared, data=cars_data)
-cars_lm <- lm(mpg ~ poly(wt, 2, raw=TRUE), data=cars_data)
+# cars_data$wt_squared <- cars_data$wt^2
+# cars_lm <- lm(mpg ~ wt + wt_squared, data=cars_data)
+## OR
+# cars_lm <- lm(mpg ~ poly(wt, 2, raw=TRUE), data=cars_data)
+## OR
 cars_lm <- lm(mpg ~ wt + I(wt^2), data=cars_data)
 print(cars_lm)
 ```
@@ -194,6 +208,7 @@ print(cars_lm)
 ## Scatterplot - Add Regression Line
 
 ```{r fig.width=5, fig.height=3.75, message=FALSE}
+par(mar=c(8,4,1,1))
 with(cars_data, plot(x=wt, y=mpg, pch=19, col=my_pal[gear], xlab="Weight (1000lb)", 
                      ylab="Miles Per Gallon"))
 wt_seq <- seq(1, 6, length=100); pred_mpg <- predict(cars_lm, newdata=data.frame(wt=wt_seq))
@@ -248,7 +263,7 @@ plot(g)
 
 ## ggplot2 - Scatterplot (cont.)
 
-```{r}
+```{r fig.height=4, fig.width=5}
 g <- ggplot(cars_data, aes(x=wt, y=mpg, col=hp)) + geom_point() +
   xlab("Weight (lb)")  + ylab("Miles per Gallon") + 
   scale_x_continuous(label=function(x) 1000*x) + scale_color_distiller() +
@@ -293,7 +308,7 @@ ggplot(cars_data, aes(x=am, y=mpg)) + geom_boxplot(width=0.5) +
 
 ## ggplot2 - Dotplot
 
-```{r}
+```{r fig.height=4, fig.width=6}
 ggplot(cars_data, aes(x=mpg, group=am)) +
   geom_dotplot(method="histodot", binwidth=2) + xlab("Miles per Gallon") +
   facet_grid(.~am) + scale_y_continuous(NULL, breaks=NULL) 
@@ -327,7 +342,7 @@ huron2 <- data.frame(year = 1973:(1973+10-1), level = predict(ar_huron, n.ahead=
 names(huron2) <- c("year","level","level.se")
 ```
 
-```{r}
+```{r fig.height=4, fig.width=6}
 ggplot(rbind(huron, huron2), aes(year)) + 
   geom_ribbon(aes(ymin = level - level.se, ymax = level + level.se), fill = "grey") +
   geom_line(aes(y = level), col="steelblue", lwd=1) +
