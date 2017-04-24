@@ -1,0 +1,354 @@
+---
+title: | 
+  Introduction to Visualization with R |
+  DataViz Meetup
+author: "Rob Carnell"
+date: "25 Apr 2017"
+output:
+  beamer_presentation:
+    includes:
+      in_header: DataVisualizationMeetUpBeamerPreamble.tex
+    keep_tex: yes
+    df_print: default
+---
+
+```{r, echo=FALSE, results=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+write.csv(mtcars, file="mtcars.csv")
+if (!require(knitr)) install.packages("knitr")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(maps)) install.packages("maps")
+if (!require(hexbin)) install.packages("hexbin")
+```
+
+## Goals for the Presentation
+### In One Hour...
+
+Provide enough familiarity with R so that you can:
+
+- Install `R` and `RStudio`
+- Understand how to get help
+- Read a CSV file into `R`
+- Change data types
+- Create `base` graphics plots
+- Create `ggplot2` graphics plots
+- Have FUN!
+
+What I won't do:
+
+- This is not a ``master class'', only an introduction
+- There is sometimes a ``better way''.  I'm trying to be clear, not efficient.
+
+## What is R?
+
+'R is a language and environment for statistical computing and graphics.' - \url{www.r-project.org}
+
+\begin{itemize}
+\item R Installation:  \url{https://cloud.r-project.org/}
+\item Install RStudio:  \url{https://www.rstudio.com/}
+\end{itemize}
+
+R is Open Source, covered by the GPL, but there are other implementations/copies...
+
+\begin{itemize}
+\item Microsoft R Open: \url{https://mran.microsoft.com/open/}
+\item pqr: \url{http://www.pqr-project.org/}
+\item fastr: \url{https://github.com/allr/purdue-fastr}
+\end{itemize}
+
+## R is Full of Tricks
+
+\begin{itemize}
+\item Extensible with packages
+\item Self Documenting + \href{https://en.wikipedia.org/wiki/Literate_programming}{Literate Programming}
+\begin{itemize}
+\item This whole presentation was created in \texttt{R/RStudio} with the \texttt{knitr} package
+\end{itemize}
+\item Coding in C/C++ using the \texttt{Rcpp} suite of headers
+\item Connections to \texttt{Java}, \texttt{python}, \texttt{C\#}, \texttt{HTML}, \TeX
+\item Connections to data in SQL Server, Oracle, Hadoop, MySQL, sqlite, JDBC, ODBC, PostgresSQL, various NoSQL...
+\item R is 1-based in the intepreter, 0-based in the underlying C code.  It's how statisticians think.  C/C++ use 0 because of pointer operations.
+\end{itemize}
+
+## How to get help
+### Help will (almost) always be given on R to those who ask for it.
+
+
+\href{http://r.789695.n4.nabble.com/R-help-f789696.html}{R Help List}
+
+\begin{itemize}
+\item Read \href{https://www.r-project.org/mail.html}{The Posting Guide}
+\item Understand \href{https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html}{Floating Point Arithmetic}
+\item Create a simple, reproducible example that doesn't need all your data
+\end{itemize}
+
+\href{https://stats.stackexchange.com/questions/tagged/r}{CrossValidated} (R Stats StackExchange)
+\href{http://stackoverflow.com/questions/tagged/r}{StackOverflow}
+
+\begin{itemize}
+\item A little more forgiving of malformed questions
+\end{itemize}
+
+In R:
+\begin{itemize}
+\item \texttt{?command} e.g. \texttt{?plot}, \texttt{?mean}, \texttt{?lm}
+\item \texttt{args(command)} also tab-complete in RStudio
+\item \texttt{help.search("command")} also help in RStudio
+\end{itemize}
+
+## Read a CSV
+
+```{r}
+cars_data <- read.csv(file.path("mtcars.csv"), stringsAsFactors=FALSE) # also an internal dataset, mtcars
+# column names
+names(cars_data)
+# rename the CSV row names
+names(cars_data) <- c("model", names(cars_data)[-1])
+names(cars_data)
+```
+
+Learn about the data: `?mtcars`
+
+## Read a CSV (cont.)
+
+```{r}
+head(cars_data)
+```
+
+## Change Data Types
+
+```{r}
+str(cars_data)
+cars_data$vs <- factor(cars_data$vs, labels=c("V","S"))
+# can also use cars_data[["vs"]] or cars_data[,9] 
+#   or cars_data[,"vs"] or cars_data[,which(names(cars_data) == "vs")]
+# advantage of cars_data$vs is tab-complete
+# advantage of cars_data[["vs"]] is that you can code the column name
+#   name_of_column <- "vs"
+#   cars_data[[name_of_column]]
+cars_data <- within(cars_data, am <- factor(am, labels=c("Automatic","Manual")))
+class(cars_data$vs)
+```
+
+## Base Graphics
+
+- Internal to R-core, no packages necessary
+- Not very object oriented.  Based on S3 object framework.  
+- Create layers on the graphics device
+- e.g. `plot.default`, `plot.lm`, `plot.ecdf`
+
+## Scatterplot
+
+```{r}
+with(cars_data, plot(x=wt, y=mpg)) # or plot(cars_data$wt, cars_data$mpg)
+```
+
+## Scatterplot - more options
+
+```{r fig.width=5, fig.height=4}
+# pch = point character, col = color, xlab = x-axis label, main = main title
+with(cars_data, plot(x=wt, y=mpg, pch=19, col=gear, xlab="Weight (1000lb)", 
+                     ylab="Miles Per Gallon", 
+                     main="Relationship of mpg to weight"))
+```
+
+## Side Note on ColorBrewer
+
+Prof Brewer at Penn State University \url{http://colorbrewer2.org}
+
+- Great colors for maps and plots!
+- Sequential (numeric), diverging (numeric with a transition), and qualitative (factors, categorical)
+
+`require(RColorBrewer)` - Method for adding packages
+
+```{r eval=TRUE, echo=FALSE, message=FALSE}
+require(RColorBrewer)
+```
+
+## Scatterplot - Add legend, use better colors, change axis
+
+```{r fig.width=5, fig.height=3.75, message=FALSE}
+my_pal <- brewer.pal(5, "Blues") # gear can take values 3, 4, 5
+with(cars_data, plot(x=wt, y=mpg, pch=19, col=my_pal[gear], xlab="Weight (lb)", 
+                     ylab="Miles Per Gallon", axes=FALSE))
+axis(2)
+axis(1, at=0:7, labels=(0:7)*1000)
+legend("topright", legend=c("3","4","5"), col=my_pal[3:5], pch=19, 
+       pt.cex=1.5, title="Number of Gears", box.col=NA)
+box()
+```
+
+## Simple Regression
+
+$Y_{mpg} = \beta_{0} + \beta_{1} X_{wt} + \beta_{2} X^{2}_{wt} + \epsilon$
+
+$\epsilon \sim N(0,\sigma^2)$
+
+```{r}
+cars_data$wt_squared <- cars_data$wt^2
+cars_lm <- lm(mpg ~ wt + wt_squared, data=cars_data)
+cars_lm <- lm(mpg ~ poly(wt, 2, raw=TRUE), data=cars_data)
+cars_lm <- lm(mpg ~ wt + I(wt^2), data=cars_data)
+print(cars_lm)
+```
+
+## Scatterplot - Add Regression Line
+
+```{r fig.width=5, fig.height=3.75, message=FALSE}
+with(cars_data, plot(x=wt, y=mpg, pch=19, col=my_pal[gear], xlab="Weight (1000lb)", 
+                     ylab="Miles Per Gallon"))
+wt_seq <- seq(1, 6, length=100); pred_mpg <- predict(cars_lm, newdata=data.frame(wt=wt_seq))
+lines(wt_seq, pred_mpg, lty=2, col="black")
+legend("topright", legend=c("3","4","5","model"), col=c(my_pal[3:5],"black"), 
+       pch=c(rep(19, 3), NA), lty=c(rep(NA, 3), 2), cex=0.75,
+       pt.cex=1.5, title="Number of Gears")
+```
+
+## Histogram
+
+```{r fig.height=4, fig.width=4}
+hist(cars_data$mpg, xlab="MPG", ylab="Frequency", main="")
+```
+
+## Boxplot
+
+```{r}
+with(cars_data, boxplot(mpg ~ am, xlab="", ylab="MPG", boxwex=0.4))
+with(cars_data, points(x=am, y=mpg, pch=as.character(vs)))
+```
+
+## Explore the Data
+
+```{r}
+pairs(subset(cars_data, select=c("mpg","cyl","disp","hp","wt")))
+```
+
+## ggplot2
+
+- <http://ggplot2.tidyverse.org/index.html>
+- Created by Hadley Wickham
+- Based on the `Grammar of Graphics`
+- Uses the `grid` graphics system
+- More object-oriented than `base` graphics
+- Requires data in a ``Long'' format. One row per observation.  Don't use indicators, use labels instead.
+- Many of the plots at the end come from the `ggplot2` website
+
+`require(ggplot2)`
+
+```{r eval=TRUE, echo=FALSE, message=FALSE}
+require(ggplot2)
+```
+
+
+## ggplot2 - Scatterplot
+
+```{r}
+g <- ggplot(cars_data, aes(x=wt, y=mpg)) + geom_point()
+plot(g)
+```
+
+## ggplot2 - Scatterplot (cont.)
+
+```{r}
+g <- ggplot(cars_data, aes(x=wt, y=mpg, col=hp)) + geom_point() +
+  xlab("Weight (lb)")  + ylab("Miles per Gallon") + 
+  scale_x_continuous(label=function(x) 1000*x) + scale_color_distiller() +
+  geom_line(aes(x=wt_seq, y=pred_mpg, lty=factor("Model")), 
+            data=data.frame(wt_seq, pred_mpg), col="black") +
+  labs(col="Power (hp)", lty="")
+plot(g)
+```
+
+## ggplot2 - Barplot
+
+```{r}
+ggplot(cars_data, aes(as.factor(cyl))) + geom_bar(fill=brewer.pal(3, "Greens")[3]) +
+  xlab("Cylinders") + ylab("Number of Car Models")
+
+```
+
+## ggplot2 - Barplot (cont)
+
+
+```{r}
+ggplot(cars_data, aes(cyl, fill=am)) + coord_flip() +
+  geom_bar(width=1) + scale_fill_brewer(type="qual", palette="Set2") + 
+  xlab("Cylinders") + ylab("Number of Car Models") + labs(fill="Transmission")
+```
+
+## ggplot2 - Histogram
+
+```{r}
+ggplot(cars_data, aes(mpg)) + 
+  geom_histogram(binwidth=1, fill=brewer.pal(3, "Greens")[3]) +
+  xlab("Miles per Gallon") + ylab("Count")
+```
+
+## ggplot2 - Boxplot
+
+```{r}
+ggplot(cars_data, aes(x=am, y=mpg)) + geom_boxplot(width=0.5) +
+  geom_point(position=position_jitter(width=0.1)) +
+  xlab("Transmission") + ylab("Miles per Gallon")
+```
+
+## ggplot2 - Dotplot
+
+```{r}
+ggplot(cars_data, aes(x=mpg, group=am)) +
+  geom_dotplot(method="histodot", binwidth=2) + xlab("Miles per Gallon") +
+  facet_grid(.~am) + scale_y_continuous(NULL, breaks=NULL) 
+```
+
+## Other Awesome Plots in ggplot2 (maps)
+
+```{r echo=FALSE, message=FALSE, warnings=FALSE}
+require(maps)
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+crimesm <- reshape2::melt(crimes, id = 1)
+states_map <- map_data("state")
+```
+
+```{r}
+ggplot(crimesm, aes(map_id = state)) +
+  geom_map(aes(fill = value), map = states_map) +
+  expand_limits(x = states_map$long, y = states_map$lat) +
+  facet_wrap( ~ variable) + scale_fill_distiller(palette="YlOrRd") + theme_bw() +
+  scale_x_continuous(NULL, breaks=NULL) + scale_y_continuous(NULL, breaks=NULL) +
+  labs(fill="Number Per\nState")
+```
+
+## Other Awesome Plots in ggplot2 (ribbon plot)
+
+```{r echo=FALSE, message=FALSE, warnings=FALSE}
+huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron), level.se=0)
+ts_huron <- ts(unlist(LakeHuron), start=1875, end=1972)
+ar_huron <- arima(x=ts_huron, order=c(2,1,3))
+huron2 <- data.frame(year = 1973:(1973+10-1), level = predict(ar_huron, n.ahead=10))
+names(huron2) <- c("year","level","level.se")
+```
+
+```{r}
+ggplot(rbind(huron, huron2), aes(year)) + 
+  geom_ribbon(aes(ymin = level - level.se, ymax = level + level.se), fill = "grey") +
+  geom_line(aes(y = level), col="steelblue", lwd=1) +
+  xlab("Year") + ylab("Lake Huron Water Level") +
+  ggtitle("ARIMA prediction of Lake Huron Water Levels (ft)")
+```
+
+## Other Awesome Plots in ggplot2 (hex density plot)
+
+```{r}
+ggplot(diamonds, aes(carat, price)) + geom_hex(binwidth=c(.1,500)) +
+  scale_fill_distiller(type="seq", palette="Greens", labels=scales::comma) +
+  scale_y_continuous(labels=scales::dollar) +
+  xlab("Weight (Carat)") + ylab("Price") + labs(fill="Count") + theme_bw()
+```
+
+## Other Awesome Plots in ggplot2 (contour plot)
+
+```{r}
+ggplot(faithfuld, aes(waiting, eruptions, z=density, col=..level..)) + 
+  geom_contour() + xlab("Waiting Time to Next Eruption (min)") +
+  ylab("Length of Eruption (min)") + labs(col="Density") +
+  ggtitle("Two Clusters of Eruption Types")
+```
