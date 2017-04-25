@@ -37,8 +37,24 @@ Provide enough familiarity with R so that you can:
 
 What I won't do:
 
-- This is not a ``master class'', only an introduction
-- There is sometimes a ``better way''.  I'm trying to be clear, not efficient.
+- This is not a **master class**, only an introduction
+- There is sometimes a **better way**.  I'm trying to be clear, not efficient.
+
+## Introduction
+
+### A Non-standard Analytics Career
+
+- B.S. Physics, US Naval Academy
+- U.S. Navy, Nuclear Engineer, Submariner
+- M.E.M. Engineering Management, Old Dominion University
+- M.S. Statistics, Miami University
+- Battelle (started back when we called this **Statistics**)
+- Huntington Bank
+
+### R User
+
+- Started with R in 2004 - I wish I had started sooner!
+- Also develop in C/C++, C#/ASP.NET, Java, python, FORTRAN
 
 ## What is R?
 
@@ -146,13 +162,13 @@ class(cars_data$vs)
 
 ## Scatterplot
 
-```{r}
+```{r fig.width=6, fig.height=4}
 with(cars_data, plot(x=wt, y=mpg)) # or plot(cars_data$wt, cars_data$mpg)
 ```
 
 ## Scatterplot - more options
 
-```{r fig.width=5, fig.height=4}
+```{r fig.width=6, fig.height=4}
 # pch = point character, col = color, xlab = x-axis label, main = main title
 with(cars_data, plot(x=wt, y=mpg, pch=19, col=gear, xlab="Weight (1000lb)", 
                      ylab="Miles Per Gallon", 
@@ -175,7 +191,7 @@ require(RColorBrewer)
 
 ## Scatterplot - Add legend, use better colors, change axis
 
-```{r fig.width=5, fig.height=4, message=FALSE}
+```{r fig.width=6, fig.height=4, message=FALSE}
 my_pal <- brewer.pal(5, "Blues") # gear can take values 3, 4, 5
 par(mar=c(8,4,1,1))
 with(cars_data, plot(x=wt, y=mpg, pch=19, col=my_pal[gear], xlab="Weight (lb)", 
@@ -191,9 +207,7 @@ box()
 $Y_{mpg} = \beta_{0} + \beta_{1} X_{wt} + \beta_{2} X^{2}_{wt} + \epsilon$, $\epsilon \sim N(0,\sigma^2)$
 \medskip
 
-\begin{itemize}
-\item Create the R model like this:
-\end{itemize}
+### Create the R model like this:
 
 ```{r}
 # cars_data$wt_squared <- cars_data$wt^2
@@ -207,7 +221,7 @@ print(cars_lm)
 
 ## Scatterplot - Add Regression Line
 
-```{r fig.width=5, fig.height=3.75, message=FALSE}
+```{r fig.width=6, fig.height=4, message=FALSE}
 par(mar=c(8,4,1,1))
 with(cars_data, plot(x=wt, y=mpg, pch=19, col=my_pal[gear], xlab="Weight (1000lb)", 
                      ylab="Miles Per Gallon"))
@@ -220,20 +234,20 @@ legend("topright", legend=c("3","4","5","model"), col=c(my_pal[3:5],"black"),
 
 ## Histogram
 
-```{r fig.height=4, fig.width=4}
+```{r fig.height=4, fig.width=6}
 hist(cars_data$mpg, xlab="MPG", ylab="Frequency", main="")
 ```
 
 ## Boxplot
 
-```{r}
+```{r fig.width=6, fig.height=4}
 with(cars_data, boxplot(mpg ~ am, xlab="", ylab="MPG", boxwex=0.4))
-with(cars_data, points(x=am, y=mpg, pch=as.character(vs)))
+with(cars_data, points(x=am, y=mpg, pch=as.character(vs), cex=0.5))
 ```
 
 ## Explore the Data
 
-```{r}
+```{r fig.width=6, fig.height=4}
 pairs(subset(cars_data, select=c("mpg","cyl","disp","hp","wt")))
 ```
 
@@ -244,8 +258,9 @@ pairs(subset(cars_data, select=c("mpg","cyl","disp","hp","wt")))
 - Based on the `Grammar of Graphics`
 - Uses the `grid` graphics system
 - More object-oriented than `base` graphics
-- Requires data in a ``Long'' format. One row per observation.  Don't use indicators, use labels instead.
-- Many of the plots at the end come from the `ggplot2` website
+- Requires data in a ``Long'' format. One row per observation.  
+- Don't use indicators, use labels instead.
+- Many of the plots at the end of the presentation come from the `ggplot2` website
 
 `require(ggplot2)`
 
@@ -256,35 +271,34 @@ require(ggplot2)
 
 ## ggplot2 - Scatterplot
 
-```{r}
+```{r fig.width=6, fig.height=4}
 g <- ggplot(cars_data, aes(x=wt, y=mpg)) + geom_point()
 plot(g)
 ```
 
 ## ggplot2 - Scatterplot (cont.)
 
-```{r fig.height=4, fig.width=5}
-g <- ggplot(cars_data, aes(x=wt, y=mpg, col=hp)) + geom_point() +
+```{r fig.height=4, fig.width=6}
+ggplot(cars_data, aes(x=wt, y=mpg, col=hp)) + geom_point() +
   xlab("Weight (lb)")  + ylab("Miles per Gallon") + 
   scale_x_continuous(label=function(x) 1000*x) + scale_color_distiller() +
   geom_line(aes(x=wt_seq, y=pred_mpg, lty=factor("Model")), 
             data=data.frame(wt_seq, pred_mpg), col="black") +
   labs(col="Power (hp)", lty="")
-plot(g)
 ```
 
 ## ggplot2 - Barplot
 
-```{r}
-ggplot(cars_data, aes(as.factor(cyl))) + geom_bar(fill=brewer.pal(3, "Greens")[3]) +
+```{r fig.width=6, fig.height=4}
+ggplot(cars_data, aes(as.factor(cyl))) + 
+  geom_bar(fill=brewer.pal(3, "Greens")[3], width=0.5) +
   xlab("Cylinders") + ylab("Number of Car Models")
 
 ```
 
 ## ggplot2 - Barplot (cont)
 
-
-```{r}
+```{r fig.width=6, fig.height=4}
 ggplot(cars_data, aes(cyl, fill=am)) + coord_flip() +
   geom_bar(width=1) + scale_fill_brewer(type="qual", palette="Set2") + 
   xlab("Cylinders") + ylab("Number of Car Models") + labs(fill="Transmission")
@@ -292,7 +306,7 @@ ggplot(cars_data, aes(cyl, fill=am)) + coord_flip() +
 
 ## ggplot2 - Histogram
 
-```{r}
+```{r fig.width=6, fig.height=4}
 ggplot(cars_data, aes(mpg)) + 
   geom_histogram(binwidth=1, fill=brewer.pal(3, "Greens")[3]) +
   xlab("Miles per Gallon") + ylab("Count")
@@ -300,7 +314,7 @@ ggplot(cars_data, aes(mpg)) +
 
 ## ggplot2 - Boxplot
 
-```{r}
+```{r fig.width=6, fig.height=4}
 ggplot(cars_data, aes(x=am, y=mpg)) + geom_boxplot(width=0.5) +
   geom_point(position=position_jitter(width=0.1)) +
   xlab("Transmission") + ylab("Miles per Gallon")
@@ -314,7 +328,18 @@ ggplot(cars_data, aes(x=mpg, group=am)) +
   facet_grid(.~am) + scale_y_continuous(NULL, breaks=NULL) 
 ```
 
-## Other Awesome Plots in ggplot2 (maps)
+# ggplot2 - Other Great Capabilities
+
+## ggplot2 - Multiple Legends
+
+```{r fig.height=4, fig.width=6}
+ggplot(iris, aes(x=Sepal.Length, y=Petal.Length, col=Species, size=Petal.Width)) +
+  geom_point(alpha=0.6) + scale_color_brewer(type="qual", palette="Set2") +
+  xlab("Sepal Length") + ylab("Petal Length") +
+  labs(size="Petal Width", col="Species")
+```
+
+## ggplot2 - maps
 
 ```{r echo=FALSE, message=FALSE, warnings=FALSE}
 require(maps)
@@ -323,7 +348,7 @@ crimesm <- reshape2::melt(crimes, id = 1)
 states_map <- map_data("state")
 ```
 
-```{r}
+```{r fig.width=6, fig.height=4}
 ggplot(crimesm, aes(map_id = state)) +
   geom_map(aes(fill = value), map = states_map) +
   expand_limits(x = states_map$long, y = states_map$lat) +
@@ -332,7 +357,7 @@ ggplot(crimesm, aes(map_id = state)) +
   labs(fill="Number Per\nState")
 ```
 
-## Other Awesome Plots in ggplot2 (ribbon plot)
+## ggplot2 - ribbon plot
 
 ```{r echo=FALSE, message=FALSE, warnings=FALSE}
 huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron), level.se=0)
@@ -350,20 +375,28 @@ ggplot(rbind(huron, huron2), aes(year)) +
   ggtitle("ARIMA prediction of Lake Huron Water Levels (ft)")
 ```
 
-## Other Awesome Plots in ggplot2 (hex density plot)
+## ggplot2 - hex density plot
 
-```{r}
+```{r fig.width=6, fig.height=4}
 ggplot(diamonds, aes(carat, price)) + geom_hex(binwidth=c(.1,500)) +
   scale_fill_distiller(type="seq", palette="Greens", labels=scales::comma) +
   scale_y_continuous(labels=scales::dollar) +
   xlab("Weight (Carat)") + ylab("Price") + labs(fill="Count") + theme_bw()
 ```
 
-## Other Awesome Plots in ggplot2 (contour plot)
+## ggplot2 - contour plot
 
-```{r}
+```{r fig.width=6, fig.height=4}
 ggplot(faithfuld, aes(waiting, eruptions, z=density, col=..level..)) + 
   geom_contour() + xlab("Waiting Time to Next Eruption (min)") +
   ylab("Length of Eruption (min)") + labs(col="Density") +
   ggtitle("Two Clusters of Eruption Types")
 ```
+
+## Thank-you
+
+**Presentation Code**: <https://github.com/bertcarnell/presentations/tree/master/2017/DataVizMeetUp>
+
+**Other R Code**:  <https://r-forge.r-project.org/users/bertcarnell/>
+
+
