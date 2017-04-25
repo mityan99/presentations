@@ -27,9 +27,9 @@ if (!require(hexbin)) install.packages("hexbin")
 
 Provide enough familiarity with R so that you can:
 
-- Install `R` and `RStudio`
+- Install **R** and **RStudio**
 - Understand how to get help
-- Read a CSV file into `R`
+- Read a CSV file into **R**
 - Change data types
 - Create `base` graphics plots
 - Create `ggplot2` graphics plots
@@ -42,60 +42,55 @@ What I won't do:
 
 ## Introduction
 
-### A Non-standard Analytics Career
+### A Roundabout Analytics Career
 
 - B.S. Physics, US Naval Academy
 - U.S. Navy, Nuclear Engineer, Submariner
 - M.E.M. Engineering Management, Old Dominion University
 - M.S. Statistics, Miami University
-- Battelle (started back when we called this **Statistics**)
+- Battelle (back when we called this **Statistics**)
 - Huntington Bank
 
-### R User
+### **R** User
 
-- Started with R in 2004 - I wish I had started sooner!
+- Started with **R** in 2004
 - Also develop in C/C++, C#/ASP.NET, Java, python, FORTRAN
 
-## What is R?
+## What is **R**?
 
-``R is a language and environment for statistical computing and graphics.'' \url{www.r-project.org}
+``\textbf{R} is a language and environment for statistical computing and graphics.'' \url{www.r-project.org}
 
 \begin{itemize}
-\item R Installation:  \url{https://cloud.r-project.org/}
-\item Install RStudio:  \url{https://www.rstudio.com/}
+\item \textbf{R} Installation:  \url{https://cloud.r-project.org/}
+\item Install \textbf{RStudio}:  \url{https://www.rstudio.com/}
 \end{itemize}
 
-R is Open Source, covered by the GPL, but there are other implementations/copies...
+\textbf{R} is Open Source, covered by the GPL, and there are other implementations/copies...
 
 \begin{itemize}
 \item Microsoft R Open: \url{https://mran.microsoft.com/open/}
-\item pqr: \url{http://www.pqr-project.org/}
-\item fastr: \url{https://github.com/allr/purdue-fastr}
+\item \texttt{pqr}: \url{http://www.pqr-project.org/}
+\item \texttt{fastr}: \url{https://github.com/allr/purdue-fastr}
 \end{itemize}
 
-## R is Full of Tricks
+## **R** is Full of Tricks
 
 \begin{itemize}
 \item Extensible with packages
-\item \texttt{ROxygen} and \texttt{RUnit} for fuction decoration and unit testing
+\item \texttt{ROxygen} and \texttt{RUnit} for function decoration and unit testing
 \item Self Documenting + \href{https://en.wikipedia.org/wiki/Literate_programming}{Literate Programming}
 \begin{itemize}
-\item This whole presentation was created in \texttt{R/RStudio} with the \texttt{knitr} package
+\item This whole presentation was created in \textbf{R/RStudio} with the \texttt{knitr} package
 \end{itemize}
 \item Coding in C/C++ using the \texttt{Rcpp} suite of headers
 \item Connections to \texttt{Java}, \texttt{python}, \texttt{C\#}, \texttt{HTML}, \TeX
 \item Connections to data in SQL Server, Oracle, Hadoop, MySQL, sqlite, JDBC, ODBC, PostgresSQL, various NoSQL...
-\item R arrays are 1-based in the intepreter, 0-based in the underlying \texttt{C} code. 
-\begin{itemize}
-\item It's how statisticians think.  \texttt{C} uses 0-based because of pointer operations.
-\end{itemize}
 \end{itemize}
 
 ## How to get help
-### Help will (almost) always be given on R to those who ask for it.
+### Help will (almost) always be given on \textbf{R} to those who ask for it.
 
-
-\href{http://r.789695.n4.nabble.com/R-help-f789696.html}{R Help List}
+\href{http://r.789695.n4.nabble.com/R-help-f789696.html}{\textbf{R} Help List}
 
 \begin{itemize}
 \item Read \href{https://www.r-project.org/mail.html}{The Posting Guide}
@@ -103,14 +98,14 @@ R is Open Source, covered by the GPL, but there are other implementations/copies
 \item Create a simple, reproducible example that doesn't need all your data
 \end{itemize}
 
-\href{https://stats.stackexchange.com/questions/tagged/r}{CrossValidated} (R Stats StackExchange)
+\href{https://stats.stackexchange.com/questions/tagged/r}{CrossValidated} (R Stats StackExchange) and 
 \href{http://stackoverflow.com/questions/tagged/r}{StackOverflow}
 
 \begin{itemize}
 \item A little more forgiving of malformed questions
 \end{itemize}
 
-In \texttt{R}:
+In \textbf{R}:
 \begin{itemize}
 \item \texttt{?command} e.g. \texttt{?plot}, \texttt{?mean}, \texttt{?lm}
 \item \texttt{args(command)} also tab-complete in \texttt{RStudio}
@@ -150,15 +145,46 @@ cars_data <- within(cars_data, am <- factor(am, labels=c("Automatic","Manual")))
 class(cars_data$vs)
 ```
 
+## Other ways to obtain data
+
+- `readLines`
+- `read.table`, `read.delim`, `read.fwf`, `readBin`
+- `openxlsx::read.xlsx`
+- `RODBC::odbcConnect` and `RODBC::sqlQuery`
+- `DBI::dbConnect`, `DBI::dbSendQuery`, `RSQLite`, `RMySQL`
+
+### Note
+\begin{itemize}
+\item \textbf{R} arrays are 1-based in the interpreter, 0-based in the underlying \texttt{C} code. 
+\begin{itemize}
+\item It's how statisticians think.  \texttt{C} uses 0-based because of pointer operations.
+\end{itemize}
+\end{itemize}
+
+# Base Graphics
+
 ## Base Graphics
 
 - Internal to R-core, no packages necessary
-
 - Not very object oriented.  Based on S3 object framework.
-
 - Create layers on the graphics device
-
 - e.g. `plot.default`, `plot.lm`, `plot.ecdf`
+
+## Basic Plot Function
+### Options
+
+- `x, y = NULL`: x and y coordinates.  y defaults to `NULL` if not supplied
+- `type`:  Type of plot.  `p` for point, `l` for line, etc.
+- `xlim, ylim`: x and y limits of the plot `c(lower, upper)`
+- `log`: log-scale axis
+- `main, sub`: main and sub-titles
+- `xlab, ylab`: x and y axis labels
+- `axes`: should the axes be displayed?
+- `...`: see `?par` for other graphical options
+
+```{r}
+args(plot.default)
+```
 
 ## Scatterplot
 
@@ -207,14 +233,14 @@ box()
 $Y_{mpg} = \beta_{0} + \beta_{1} X_{wt} + \beta_{2} X^{2}_{wt} + \epsilon$, $\epsilon \sim N(0,\sigma^2)$
 \medskip
 
-### Create the R model like this:
+Create the **R** model like this:
 
 ```{r}
 # cars_data$wt_squared <- cars_data$wt^2
 # cars_lm <- lm(mpg ~ wt + wt_squared, data=cars_data)
-## OR
+# OR
 # cars_lm <- lm(mpg ~ poly(wt, 2, raw=TRUE), data=cars_data)
-## OR
+# OR
 cars_lm <- lm(mpg ~ wt + I(wt^2), data=cars_data)
 print(cars_lm)
 ```
@@ -251,6 +277,8 @@ with(cars_data, points(x=am, y=mpg, pch=as.character(vs), cex=0.5))
 pairs(subset(cars_data, select=c("mpg","cyl","disp","hp","wt")))
 ```
 
+# ggplot2
+
 ## ggplot2
 
 - <http://ggplot2.tidyverse.org/index.html>
@@ -268,6 +296,25 @@ pairs(subset(cars_data, select=c("mpg","cyl","disp","hp","wt")))
 require(ggplot2)
 ```
 
+## ggplot2 - Basic Options
+
+- `data = NULL`: the `data.frame` containing the data
+- `mapping = aes()`: the aesthetics of the plot.  Any option defined in the `aes()`
+command will turn into an axis or legend
+- `...`: any option defined outside `aes()` will not become a legend entry
+
+### aes()
+
+- `x, y, z`
+- `alpha`: transparency
+- `colour`: line and point color, `fill`: the fill color
+- `group`: data groupings
+- `shape`: the plotting shape, `size`: the point size
+- `linetype`: the type of line (solid, dashed, dotted, etc.)
+
+```{r}
+args(ggplot)
+```
 
 ## ggplot2 - Scatterplot
 
@@ -396,7 +443,4 @@ ggplot(faithfuld, aes(waiting, eruptions, z=density, col=..level..)) +
 ## Thank-you
 
 **Presentation Code**: <https://github.com/bertcarnell/presentations/tree/master/2017/DataVizMeetUp>
-
-**Other R Code**:  <https://r-forge.r-project.org/users/bertcarnell/>
-
 
